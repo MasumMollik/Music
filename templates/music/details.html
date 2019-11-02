@@ -1,0 +1,66 @@
+{% extends 'music/base.html' %} {% block body %} {% load static %}
+{% load notifications_tags %}
+<div class="container-fluid">
+
+	<div class="row">
+
+
+		<img
+			src="{{ album.album_logo.url }}"
+			style="width:400px;height:400px;"
+			hspace="360"
+			/>
+	</div>
+	<div class="row">
+		{% notifications_unread as unread_count %}
+		{% if unread_count %}
+		You have <strong>{{ unread_count }}</strong> unread notifications.
+		{{ user.notifications.objects.all }}
+		{% endif %}
+	</div>
+	<div class="row">
+		<h1> Album Name: {{ album.name }} </h1>
+	</div>
+	<div class="row">
+		<h3> Artist: {{ album.artist }}</h3>
+	</div>
+	<div class="row">
+		<h3> Genre: {{ album.genre }}</h3>
+	</div>
+	<div class="row">
+		{% if error_message %}
+		<p><strong>{{ error_message }}</strong></p>
+		<p></p>
+		{% endif %}
+		<br>
+		{%if album.song_set.all %}
+		<h3>Songs: </h3><br><br>
+		<form action="{% url 'music:favorite' album.id %}" method="POST">
+			{% csrf_token %} {%for song in album.song_set.all%}
+			<input
+				type="radio"
+				id="song{{ forloop.counter }}"
+				name="song"
+				value="{{ song.id }}"
+				/>
+			<label for="song{{ forloop.counter }}" style="font-size: 40px">
+				{{ song.song_title }}
+				<audio controls>
+					<source src="{{ song.file.url }}" type="audio/{{song.file_type}}"></audio>
+				{% if song.is_favorite %}
+				<img
+					src="{% static '/music/images/star.png' %}"
+					style="width:30px;height:30px;"
+					/>
+				{%endif %} </label><br />
+			{% endfor %}
+			<input type="submit" name="Favorite" value="Favorite" />
+			<input type="submit" name="Unfavorite" value="Unfavorite" />
+		</form>
+		{% else %}
+		<br>
+		<strong>No Song Available</strong>
+		{%endif%}
+	</div>
+</div>
+{% endblock %}
